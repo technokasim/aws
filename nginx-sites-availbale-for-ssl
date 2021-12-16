@@ -1,0 +1,35 @@
+  GNU nano 4.8                                                                                                     testproject
+
+server {
+    server_name test.website.com;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location /static/ {
+        root /home/ubuntu/test;
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/run/testproject.sock;
+    }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/test.website.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/test.website.com/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+}
+server {
+    if ($host = test.website.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    server_name test.website.com;
+    return 404; # managed by Certbot
+
+
+}
