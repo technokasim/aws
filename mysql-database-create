@@ -1,0 +1,167 @@
+How to Install Latest MySQL Server on EC2 Ubuntu 18.04
+May 10, 2020 | By Gerald | Filed in: AWS.
+How to Install MySQL on Amazon EC2 (Ubuntu 18.04)
+In this tutorial, you will learn how to install MySQL on EC2 Ubuntu 18.04 and creating new MySQL user and grant user permission for new database.
+
+If you are planning to install a dedicated MySQL server for your web application or WordPress website in Amazon EC2 instance. This tutorial can help you create new users for new databases and automated daily MySQLdump backup.
+
+MySQL is the most widely used open-source relational database management system that offers a rich and useful set of functions as fast, reliable, scalable, and easy to use. MySQL is commonly used for system components of a LAMP server.
+
+What will you do
+Install MySQL Server
+Create New MySQL Database
+Add New User For MySQL Database
+Grant User Permission for MySQL Database
+Configure MySQL root password
+Verify MySQL Database
+Basic MySQLdump command and importing database
+Requirements
+AWS Account. Create your own AWS Account
+Amazon EC2 Ubuntu 18.04. Learn how to deploy Ubuntu 18.04 on AWS
+A user with sudo privilege command.
+To get started, this guide shows you through step process on how to install MySQL server on EC2 Ubuntu 18.04.
+
+Step 1. Install MySQL Server
+
+ 
+Login to your EC2 Ubuntu 18.04 server using SSH remote and run install update for your server system packages, type command:
+
+sudo apt updateCopy
+To install MySQL server on Ubuntu 18.04, type command:
+
+sudo apt-get install mysql-server -yCopy
+After installing the MySQL, the root user is configured using the auth_socket authentication plugin and then when you enter to the console of mysql using sudo mysql you’re automatically authenticated, without a password.
+
+Step 2. Create New MySQL database
+By default, any non-root user does not have privileges to execute Mysql commands. To login on MySQL as root user, type command:
+
+sudo mysqlCopy
+Note: You can signed in to MySQL console without using a password and you can also do whatever you want on MySQL database.
+
+
+ 
+Next, Create a database, type command:
+
+CREATE DATABASE mynewdatabase;Copy
+Next, Show the databases using:
+
+SHOW DATABASES;Copy
+Step 3. Add New User for MySQL Database
+Create a new user for your new MySQL database and provide a strong password, use the command.
+
+CREATE USER 'myuser'@'localhost' IDENTIFIED BY 'mypassword';Copy
+Next, continue to setup for MySQL permission for your new user.
+
+Step 4. Grant User permission for MySQL database
+After creating a new user, by default, it has no privileges to execute MySQL query in the database. However, the user can sign in to the database but can not use to any changes on the database.
+
+
+ 
+To add user privileges, type command:
+
+GRANT ALL PRIVILEGES ON mynewdatabase.* TO 'myuser'@'localhost' WITH GRANT OPTION;Copy
+To apply the database changes without reloading your MySQL service. Type command:
+
+FLUSH PRIVILEGES;Copy
+The FLUSH PRIVILEGES command, tells the server to reload the grant tables in the mysql database enabling the changes to take effect without reloading or restarting mysql service.
+
+Next, exit from the MySQL console using:
+
+EXIT;Copy
+Step 5. Configure MySQL root password
+By default the MySQL root user is using authentication socket to signed from the MySQL console. In this guide, you will create a new strong password for the root user to make sure it is safe for anyone.
+
+
+ 
+To do this, type command:
+
+sudo mysqlCopy
+Next, Verify which authentication method each of your MySQL user account, type command:
+
+SELECT user,authentication_string,plugin,host FROM mysql.user;Copy
+The output looks like this:
+
+mysql without root password
+You can see the root user has no authentication_string and using the auth_socket plugin.
+
+Next, Type ALTER USER command to configure the root account to authenticate using password access.
+
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'mypassword';Copy
+
+ 
+Next, Type FLUSH PRIVILEGES which tells the server to reload the grant tables to effect the changes immediately.
+
+FLUSH PRIVILEGES;Copy
+Verify your root user and confirm, if root user is no longer authenticated with auth_socket plugin, run the command.
+
+SELECT user,authentication_string,plugin,host FROM mysql.user;Copy
+The output something like this:
+
+mysql with root password
+You can see the example output above that the socket plugin is removed and the root user is authenticated with a MySQL native password.
+
+Next, exit from the MySQL console using:
+
+EXIT;Copy
+Step 6. Verify MySQL Database
+
+ 
+The MySQL database will start automatically after the installation. Now to check the status of the database, type the command:
+
+sudo service mysql statusCopy
+You’ll see output similar:
+
+● mysql.service - MySQL Community Server
+   Loaded: loaded (/lib/systemd/system/mysql.service; enabled; vendor preset: enabled)
+   Active: active (running) since Thu 2019-05-09 04:44:59 UTC; 1h 41min ago
+ Main PID: 5152 (mysqld)
+    Tasks: 29 (limit: 1152)
+   CGroup: /system.slice/mysql.service
+           └─5152 /usr/sbin/mysqld --daemonize --pid-file=/run/mysqld/mysqld.pid
+Copy
+To manage your MySQL server on Ubuntu 18.04 server, use the following command:
+
+sudo service mysql start
+sudo service mysql stop
+sudo service mysql reload
+sudo service mysql restartCopy
+For an additional check, you can try connecting to the database using the mysqladmin tool and return the version.
+
+sudo mysqladmin -p -u root versionCopy
+You should see output similar something like this:
+
+mysqladmin  Ver 8.42 Distrib 5.7.26, for Linux on x86_64
+Copyright (c) 2000, 2019, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Server version		5.7.26-0ubuntu0.18.04.1
+Protocol version	10
+Connection		Localhost via UNIX socket
+UNIX socket		/var/run/mysqld/mysqld.sock
+Uptime:			1 hour 43 min 2 sec
+
+Threads: 2  Questions: 5  Slow queries: 0  Opens: 105  Flush tables: 1  Open tables: 98  Queries per second avg: 0.000
+Copy
+Step 7. Basic MySQLdump command and importing database
+
+ 
+If you want to backup your database within Ubuntu 18.04 server, type this command.
+
+mysqldump -u username -p database_name > database_name.sqlCopy
+To restore/import database from backup sql file, use this command:
+
+mysql -u username -p database_name < database_name.sqlCopy
+See: Learn how to automate your MySQL database backup.
+
+To audit and troubleshoot error, use this command:
+
+sudo tail -f /var/log/mysql/error.logCopy
+That’s all.
+
+
+
+
+https://linuxbeast.com/tutorials/aws/how-to-install-mysql-on-amazon-ec2-ubuntu-18-04/
