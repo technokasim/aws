@@ -1,0 +1,6 @@
+#to change mysql password
+
+mysql -u root -p
+After which it asks you for a password like this
+
+Enter password:
